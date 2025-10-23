@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HR Mock Test Portal — Professional</title>
+
+<!-- html2pdf for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --accent:#0f62fe;
+    --accent-2:#16a085;
+    --danger:#e74c3c;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,-apple-system,Arial;
+    background:linear-gradient(180deg,#eef6ff 0%, #f4f7fb 100%);
+    color:#0b1220;
+  }
+
+  /* NAV */
+  .nav {
+    position:fixed; left:0; right:0; top:0; z-index:60;
+    background:rgba(15,98,254,0.95); color:white; backdrop-filter: blur(6px);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .nav .inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:12px 18px;}
+  .brand{font-weight:800; font-size:18px;}
+  .nav-links{margin-left:auto;display:flex;gap:14px;align-items:center;}
+  .nav-links a{color:rgba(255,255,255,0.95); text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:600;}
+  .nav-links a:hover{background:rgba(255,255,255,0.06)}
+
+  /* Header hero */
+  header.hero{
+    margin-top:64px;
+    padding:44px 18px 24px;
+    text-align:center;
+    background:linear-gradient(180deg,#0f62fe,#0b57d8);
+    color:white;
+  }
+  header.hero h1{font-size:28px;margin:6px 0 8px}
+  header.hero p{margin:0;opacity:0.95;color:rgba(255,255,255,0.95)}
+
+  /* main layout */
+  .wrap{max-width:1200px;margin:24px auto;padding:0 18px; display:grid; grid-template-columns: 360px 1fr; gap:20px;}
+  @media(max-width:980px){ .wrap{grid-template-columns:1fr} .left{order:2} .right{order:1} }
+
+  /* left panel (subjects + sidebar) */
+  .panel{background:var(--card); border-radius:12px; padding:16px; box-shadow:0 10px 30px rgba(12,20,30,0.06);}
+  .subjects{display:grid; gap:12px}
+  .subject-card{padding:12px;border-radius:10px;border:1px solid rgba(15,98,254,0.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:transform .15s, box-shadow .15s}
+  .subject-card:hover{transform:translateY(-6px); box-shadow:0 12px 30px rgba(12,20,30,0.06)}
+  .sub-meta{font-size:13px;color:var(--muted)}
+  .start-btn{background:linear-gradient(90deg,var(--accent), #6aa8ff); color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700}
+
+  .small{font-size:13px;color:var(--muted)}
+
+  /* right area: test card */
+  .test-wrap{display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card); border-radius:12px; padding:18px; box-shadow:0 10px 30px rgba(12,20,30,0.06)}
+  .select-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{padding:8px 12px;border-radius:999px;border:1px solid rgba(15,98,254,0.08);cursor:pointer}
+  .pill.active{background:linear-gradient(90deg,var(--accent), #6aa8ff); color:white; border:none}
+
+  /* quiz area */
+  .quiz-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .qtitle{font-weight:800;font-size:18px}
+  .timer{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .time-circle{width:84px;height:84px;border-radius:999px;border:6px solid rgba(15,98,254,0.12);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .progressOuter{height:10px;background:#eef2ff;border-radius:999px;overflow:hidden;margin-top:6px}
+  .progressInner{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-2), #10a37f);transition:width .3s}
+
+  .question-card{margin-top:12px}
+  .question-text{font-weight:700;font-size:16px;margin-bottom:10px}
+  .options{display:flex;flex-direction:column;gap:8px}
+  .opt{padding:12px;border-radius:10px;border:1px solid rgba(15,98,254,0.06);cursor:pointer;background:#f7fbff;transition:transform .12s,box-shadow .12s}
+  .opt:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(12,20,30,0.06)}
+  .opt.selected{background:linear-gradient(90deg, rgba(16,163,129,0.12), rgba(15,98,254,0.06)); border-color:rgba(16,163,129,0.18)}
+
+  .nav-controls{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+  .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+  .btn.ghost{background:#eef2ff;color:var(--accent);border:1px solid rgba(15,98,254,0.08)}
+  .btn.primary{background:linear-gradient(90deg,var(--accent), #6aa8ff); color:white}
+
+  /* result */
+  .result{display:none}
+  .score{font-size:22px;font-weight:800;color:var(--accent-2)}
+  .analysis{margin-top:12px}
+
+  /* footer */
+  footer{max-width:1200px;margin:28px auto 80px;padding:18px;color:var(--muted);text-align:center;}
+
+  /* responsive small text */
+  @media(max-width:520px){ .time-circle{width:68px;height:68px} .qtitle{font-size:16px} }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="inner">
+    <div class="brand">MockHive • HR Mock Test</div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#subjects">Subjects</a>
+      <a href="#tips">Tips</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</div>
+
+<header class="hero" id="home">
+  <h1>Welcome to MockHive — HR Mock Test Portal</h1>
+  <p>Choose a subject, start a timed mock test, and get instant analysis & downloadable report.</p>
+</header>
+
+<main class="wrap">
+  <!-- LEFT: subjects & info -->
+  <aside class="left">
+    <div class="panel" id="subjects">
+      <h3 style="margin:0 0 12px">Choose Subject</h3>
+      <div class="subjects" id="subjectList"></div>
+
+      <div style="margin-top:14px;">
+        <div class="small">Test settings</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <div>
+            <label class="small">Questions</label><br>
+            <select id="numQ" style="padding:8px;border-radius:8px;border:1px solid #e8eefc;">
+              <option value="10">10 Q</option>
+              <option value="15">15 Q</option>
+              <option value="20" selected>20 Q</option>
+            </select>
+          </div>
+          <div>
+            <label class="small">Time (mins)</label><br>
+            <select id="timeMins" style="padding:8px;border-radius:8px;border:1px solid #e8eefc;">
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20" selected>20</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:8px;">
+        <button id="startTestBtn" class="start-btn">Start Test</button>
+        <button id="sampleBtn" class="start-btn" style="background:transparent;color:var(--accent);border:1px solid rgba(15,98,254,0.08)">Sample</button>
+      </div>
+
+      <div style="margin-top:14px" class="small">
+        Tip: Use Next / Previous to navigate. Skip a question to attempt later. Test auto-submits when time ends.
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px" id="tips">
+      <h4 style="margin:0 0 8px">Interview Tips</h4>
+      <ul style="padding-left:18px;color:var(--muted);margin:0">
+        <li>Maintain clear, calm communication.</li>
+        <li>Use STAR for behavioral answers.</li>
+        <li>Research company & role before interview.</li>
+        <li>Be concise — highlight results, not tasks.</li>
+        <li>Practice mock tests to build speed & accuracy.</li>
+      </ul>
+    </div>
+
+    <div class="panel" style="margin-top:16px" id="contact">
+      <h4 style="margin:0 0 8px">Contact</h4>
+      <div class="small">Email: support@mockhive.com</div>
+      <div class="small" style="margin-top:6px">Phone: +91 98765 43210</div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: test area -->
+  <section class="right test-wrap">
+    <div class="card" id="setupCard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800;font-size:18px">Mock Test Dashboard</div>
+          <div class="small" style="margin-top:6px">Choose a subject and hit Start Test to begin.</div>
+        </div>
+        <div style="text-align:right">
+          <div class="small">Selected:</div>
+          <div id="selSubject" style="font-weight:700">None</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+        <div class="pill">Realistic HR Questions</div>
+        <div class="pill">Timed</div>
+        <div class="pill">Analysis</div>
+      </div>
+    </div>
+
+    <div class="card" id="quizCard" style="display:none">
+      <div class="quiz-header">
+        <div>
+          <div class="qtitle" id="testTitle">Test</div>
+          <div class="small" id="qSub">Subject</div>
+        </div>
+        <div class="timer">
+          <div class="time-circle" id="timeCircle">20:00</div>
+          <div class="progressOuter"><div class="progressInner" id="progressBar"></div></div>
+        </div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <!-- question injected -->
+      </div>
+
+      <div class="nav-controls">
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="skipBtn">Skip</button>
+          <button class="btn ghost" id="prevBtn">← Previous</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn primary" id="nextBtn">Next →</button>
+          <button class="btn ghost" id="finishBtn">Finish</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card result" id="resultCard" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800">Test Result</div>
+          <div class="small" id="resultMeta">Summary</div>
+        </div>
+        <div style="text-align:right">
+          <div class="score" id="scoreText">0 / 0</div>
+          <div class="small" id="percentText">0%</div>
+        </div>
+      </div>
+
+      <div class="analysis" id="analysisArea"></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" id="retakeBtn">Retake</button>
+        <button class="btn primary" id="downloadReport">Download Report</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  © <span id="year"></span> MockHive — HR Mock Test Portal. All rights reserved.
+</footer>
+
+<script>
+/* -------------------------
+   Questions dataset: 5 subjects x 20 q each
+   Each item: {q, opts:[...], ans:index, explain:"..." }
+   ------------------------- */
+const dataset = {
+  "General HR": [
+    {q:"What does HR stand for?", opts:["Human Resources","High Revenue","Home Room","Human Relations"], ans:0, explain:"HR means Human Resources — department managing people, hiring, policies and payroll."},
+    {q:"Primary function of HR is:", opts:["Hiring & onboarding","Only payroll","Selling products","Manufacturing"], ans:0, explain:"HR handles recruitment, onboarding, employee relations, training and compliance."},
+    {q:"What is an onboarding process?", opts:["Integrating new employees","Firing employees","Salary calculation","Holiday planning"], ans:0, explain:"Onboarding helps new hires settle — paperwork, orientation, training and introductions."},
+    {q:"What is employee engagement?", opts:["Levels of involvement & motivation","Only salaries","Office cleaning","Work schedule"], ans:0, explain:"Engagement measures motivation, connection with company and willingness to contribute."},
+    {q:"Which law governs workplace safety in many countries?", opts:["Occupational Safety laws","Trademark law","Tax law","Patent law"], ans:0, explain:"Occupational safety laws ensure safe working conditions (examples: OSHA in USA)."},
+    {q:"What is performance appraisal?", opts:["Employee evaluation process","Firing process","Payroll slip","Job posting"], ans:0, explain:"A structured evaluation of employee performance used for feedback and promotions."},
+    {q:"What does attrition mean?", opts:["Employee turnover","Payroll increase","Profit rise","Training program"], ans:0, explain:"Attrition describes employees leaving over time; organisations track it to manage retention."},
+    {q:"What is HRIS?", opts:["HR Information System","Health Research Institute","Human Relations Idea","Hiring Rapidly In System"], ans:0, explain:"HRIS is software for HR tasks — employee records, payroll, reporting."},
+    {q:"Why is diversity important at workplace?", opts:["Brings varied perspectives","Increases costs","Slows decisions","Unnecessary"], ans:0, explain:"Diversity leads to better decisions, creativity and wider talent pool."},
+    {q:"Which is a typical HR KPI?", opts:["Time to hire","Number of apps installed","Sales quota","Server uptime"], ans:0, explain:"Time to hire measures hiring speed — a common HR metric."},
+    {q:"What is employer branding?", opts:["Company reputation as employer","Branded stationery","Payroll brand","Office decor"], ans:0, explain:"Employer branding attracts talent by showcasing culture and benefits."},
+    {q:"What is a job description?", opts:["Responsibilities and skills for role","Employee salary","Company policy","Training module"], ans:0, explain:"Job description explains duties, required skills and reporting lines."},
+    {q:"What is lateral hiring?", opts:["Hiring at same level from outside","Promoting internally","Firing someone","Hiring interns"], ans:0, explain:"Lateral hiring brings experienced professionals at the same level from other companies."},
+    {q:"What is succession planning?", opts:["Preparing replacements for key roles","Immediate hiring","Event planning","Office lease"], ans:0, explain:"Succession planning ensures continuity by developing internal talent for future roles."},
+    {q:"What is a probation period?", opts:["A trial employment period","Long vacation","Salary bonus","Office probation"], ans:0, explain:"Probation is a trial period to assess fit before confirming employment."},
+    {q:"What does onboarding include?", opts:["Training and orientation","Only paperwork","Salary only","Exit interview"], ans:0, explain:"Onboarding includes paperwork, introductions, training and cultural orientation."},
+    {q:"What is an exit interview for?", opts:["Gather feedback from leaving employees","Hiring new employees","Salary negotiation","Performance appraisal"], ans:0, explain:"Exit interviews help understand reasons for leaving and improve retention."},
+    {q:"Why track employee attendance?", opts:["Payroll and productivity tracking","Only to punish","Irrelevant","For holiday lists"], ans:0, explain:"Attendance links to payroll, planning and performance management."},
+    {q:"What is remote work policy?", opts:["Rules for working remotely","Only vacations","Hiring policy","Recruitment software"], ans:0, explain:"Policy defines expectations, tools, security and hours for remote employees."},
+    {q:"Why is training important?", opts:["Skill development & productivity","Only to fill time","Expensive gift","Not needed"], ans:0, explain:"Training upgrades skills, improving performance and career growth."}
+  ],
+
+  "Behavioral": [
+    {q:"What is the STAR method?", opts:["Situation, Task, Action, Result","Start, Try, Act, Repeat","Stop, Test, Analyze, Report","Speak, Think, Act, Reflect"], ans:0, explain:"STAR structures behavioral answers: describe situation, task, actions taken and result."},
+    {q:"How to answer a teamwork question?", opts:["Explain role and contribution","Blame others","Say nothing","Answer with salary demands"], ans:0, explain:"Describe situation, your role, actions and team result — show collaboration."},
+    {q:"How to show leadership in answers?", opts:["Highlight initiative and outcomes","Talk vaguely","Avoid responsibility","Focus on mistakes"], ans:0, explain:"Demonstrate when you led tasks, decisions taken, and measurable outcomes."},
+    {q:"How to answer weakness question?", opts:["Be honest + show improvement plan","Say 'none'","Lie","Avoid question"], ans:0, explain:"Pick a real weakness and explain steps you’re taking to improve."},
+    {q:"How to discuss failure?", opts:["Explain what you learned","Deny it","Blame others","Should not discuss"], ans:0, explain:"Share what went wrong, what you changed, and the lessons learned."},
+    {q:"What's important in conflict resolution?", opts:["Communication & empathy","Winning argument","Avoidance","Retaliation"], ans:0, explain:"Listen, understand other view, find common ground and propose solutions."},
+    {q:"How to show adaptability?", opts:["Share example of change you handled","Claim you're always comfortable","Refuse change","Delay tasks"], ans:0, explain:"Give example where you quickly adapted and worked effectively."},
+    {q:"How to show problem solving?", opts:["Explain analysis & action","Say 'I don't know'","Blame others","Avoid detail"], ans:0, explain:"Describe steps you took to identify root cause and resolve it."},
+    {q:"How to speak about pressure?", opts:["Describe coping strategies","Complaints only","Ignore the interviewer","Be defensive"], ans:0, explain:"Explain how you prioritise and stay calm, with a real example."},
+    {q:"How to prepare answers?", opts:["Practice with examples & metrics","Memorize scripts","Avoid practice","Copy others"], ans:0, explain:"Practice concise answers with facts, outcomes and metrics."},
+    {q:"How to show initiative?", opts:["Share a project you started","Wait for orders","Only follow","Avoid leadership"], ans:0, explain:"Give example where you proactively solved an issue or improved a process."},
+    {q:"How to present teamwork failure?", opts:["Own responsibility & learning","Blame team","Escape","Lie"], ans:0, explain:"Show self-awareness and the corrective steps you took afterwards."},
+    {q:"How to demonstrate continuous learning?", opts:["Share courses/projects you did","Claim you know everything","Ignore learning","Complain about learning"] , ans:0, explain:"Mention courses, side projects, books or mentorship you pursued."},
+    {q:"How to answer 'strengths'?", opts:["Align strengths with role","Provide irrelevant skills","Boast without proof","Say none"], ans:0, explain:"Choose 2–3 strengths with evidence (projects, results) that match job needs."},
+    {q:"How to handle vague questions?", opts:["Ask clarifying question then answer","Guess randomly","Stay silent","Change topic"], ans:0, explain:"Clarify context before answering to show communication skills."},
+    {q:"How to show time management?", opts:["Share planning tools and example","Say 'I multitask' only","Ignore details","Say 'I don't'"], ans:0, explain:"Explain prioritization method and an example delivering on time."},
+    {q:"How to stay professional under criticism?", opts:["Receive, reflect, act","Get defensive","Ignore feedback","Argue with manager"], ans:0, explain:"Take feedback calmly, act on improvements, and thank for input."},
+    {q:"How to answer 'why this job'?", opts:["Connect passion & skills to role","Say 'salary' only","Give irrelevant reasons","Compliment salary"], ans:0, explain:"Show alignment with company's mission, role and your growth plan."},
+    {q:"How to discuss remote teamwork?", opts:["Explain tools & communication used","Say remote never works","Avoid details","Focus on complaints"], ans:0, explain:"Talk about tools, meetings cadence and proactive communication that worked."},
+    {q:"How to answer 'what you learned recently'?", opts:["Mention a short course or project","Say nothing","Lie","Avoid subject"], ans:0, explain:"Mention a specific learning and how you applied it practically."}
+  ],
+
+  "Technical HR": [
+    {q:"Which HR software is widely used?", opts:["SAP SuccessFactors","Adobe Photoshop","AutoCAD","Slack only"], ans:0, explain:"SAP SuccessFactors and Workday are examples of HR platforms for HR workflows."},
+    {q:"What is payroll processing?", opts:["Calculating employee salaries","Hiring people","Scheduling meetings","Monitoring network"], ans:0, explain:"Payroll handles salary calculation, taxes, deductions and payslips."},
+    {q:"What is an HR dashboard?", opts:["Visual KPIs & reports","Job portal","Employee handbook","Recruiter tool"], ans:0, explain:"Dashboards show metrics — hires, attrition, performance trends for decision making."},
+    {q:"What is ATS?", opts:["Applicant Tracking System","Automatic Training Software","Assessment Tool Suite","Accounting Tracking System"], ans:0, explain:"ATS helps manage job postings, applications and candidate pipelines."},
+    {q:"What is a psychometric test?", opts:["Assessment of aptitude & personality","Only IQ test","Medical test","Tax test"], ans:0, explain:"Psychometric tests assess cognitive ability, personality and fit for role."},
+    {q:"What is onboarding automation?", opts:["Using software to streamline onboarding","Manual paperwork","Only orientation","Not useful"], ans:0, explain:"Automation speeds up paperwork, training schedules and access provisioning."},
+    {q:"Why integrate HR & payroll?", opts:["Consistency & fewer errors","Redundancy","Extra work","Not needed"], ans:0, explain:"Integration reduces manual errors and ensures accurate payroll data."},
+    {q:"What is e-learning in HR?", opts:["Online training platform","In-person class","Email only","Not training"], ans:0, explain:"E-learning platforms deliver courses, track completion and skills development."},
+    {q:"What is competency mapping?", opts:["Linking skills to roles","Only job title mapping","Salary mapping","Not used"], ans:0, explain:"Mapping required competencies to roles helps in recruitment and development."},
+    {q:"What does L&D stand for?", opts:["Learning & Development","Logistics & Delivery","Legal & Documentation","Leasing & Development"], ans:0, explain:"L&D focuses on training and career development for employees."},
+    {q:"What is integration with payroll taxes?", opts:["Automate tax calculations","Manual tax filing","Ignore taxes","Not allowed"], ans:0, explain:"Systems calculate statutory taxes and deductions automatically for compliance."},
+    {q:"What is a 360-degree feedback?", opts:["Feedback from peers, managers & reports","Only manager feedback","Only peers","Only self-review"], ans:0, explain:"360 feedback collects perspectives from multiple stakeholders for development."},
+    {q:"What is HR analytics?", opts:["Using data to inform HR decisions","Guesstimates","Only surveys","Not used"], ans:0, explain:"HR analytics uses metrics to improve hiring, retention and performance."},
+    {q:"What is succession planning technical requirement?", opts:["Talent pool & readiness metrics","Only interview schedules","Not relevant","Salary lists"], ans:0, explain:"It requires skills matrices, readiness and development plans."},
+    {q:"What is a candidate pipeline?", opts:["Pool of potential candidates","Payroll list","Holiday list","Not used"], ans:0, explain:"A pipeline stores qualified candidates for current and future roles."},
+    {q:"Why use video interviews?", opts:["Save time & reach remote candidates","Only for fun","Not professional","Illegal"], ans:0, explain:"Video interviews speed initial screening and enable remote hiring."},
+    {q:"What is compliance in HR tech?", opts:["Meeting legal & policy requirements","Only internal rules","Design guidelines","Not used"], ans:0, explain:"Compliance ensures systems follow labor laws, data protection and policies."},
+    {q:"What is skills gap analysis?", opts:["Compare required vs actual skills","Only hire more people","Not useful","Salary benchmarking"], ans:0, explain:"It identifies where training or hiring is needed to fill capability gaps."},
+    {q:"What is an employee self-service portal?", opts:["Employees manage leaves & details themselves","Only admin tool","Payroll code","Not used"], ans:0, explain:"ESS lets employees update profiles, apply for leave and view payslips."},
+    {q:"Why secure HR data?", opts:["Protect privacy & compliance","Only for IT","Not important","For marketing"], ans:0, explain:"HR data is sensitive — security prevents breaches and legal issues."}
+  ],
+
+  "Managerial": [
+    {q:"What is delegation?", opts:["Assigning responsibility to others","Doing everything yourself","Ignoring tasks","Only scheduling"], ans:0, explain:"Delegation assigns tasks and authority to team members to achieve goals."},
+    {q:"What is strategic planning?", opts:["Long-term direction & goals","Daily tasks","Only hiring","Only training"], ans:0, explain:"Strategic planning sets objectives and resource plans for future growth."},
+    {q:"What is KPI?", opts:["Key Performance Indicator","Key Personal Item","Known People Index","Kitchen Performance Indicator"], ans:0, explain:"KPIs measure progress against strategic and operational goals."},
+    {q:"How to manage remote teams?", opts:["Clear communication & trust","Micromanage","Ignore them","No meetings"], ans:0, explain:"Set expectations, regular check-ins, and use collaboration tools."},
+    {q:"What is change management?", opts:["Guiding organizational change","Only hiring","Only training","Ignore changes"], ans:0, explain:"Change management prepares people and processes for transitions smoothly."},
+    {q:"Why is delegation important?", opts:["Scales productivity & develops team","Only saves time","Not needed","Creates problems"], ans:0, explain:"Delegation builds capacity, frees leaders for strategic work and develops skills."},
+    {q:"What is risk management?", opts:["Identify and mitigate threats","Only HR task","Marketing job","Not required"], ans:0, explain:"Risk management reduces chance and impact of adverse events."},
+    {q:"What is stakeholder management?", opts:["Managing expectations of interested parties","Ignore stakeholders","Only customers","Only investors"], ans:0, explain:"Engaging stakeholders ensures alignment and support for decisions."},
+    {q:"How to measure team performance?", opts:["KPIs, feedback & results","Only feelings","Only attendance","Not measured"], ans:0, explain:"Use metrics, reviews and outcomes to assess team performance."},
+    {q:"What makes a good manager?", opts:["Communication, empathy & clarity","Authority only","Micromanagement","Indecision"], ans:0, explain:"Good managers coach, clarify goals and enable team success."},
+    {q:"How to handle underperformance?", opts:["Coaching, clear expectations & follow-up","Ignore","Punish immediately","Publicly shame"], ans:0, explain:"Diagnose causes, set plan and monitor improvement with support."},
+    {q:"What is stakeholder alignment?", opts:["Ensuring shared goals","Only internal policy","Ignore others","Only CEO job"], ans:0, explain:"Aligning objectives across stakeholders avoids conflicts and delays."},
+    {q:"What is resource planning?", opts:["Allocating people & budget to projects","Only hiring","Scheduling meetings","Coffee planning"], ans:0, explain:"Ensure right resources are assigned to meet deliverables efficiently."},
+    {q:"How to foster innovation?", opts:["Encourage experimentation & psychological safety","Punish mistakes","Stop new ideas","Ignore suggestions"], ans:0, explain:"Create safe environment to try ideas, iterate and celebrate learning."},
+    {q:"What is performance feedback?", opts:["Regular constructive review","Only annual","Only praise","Not needed"], ans:0, explain:"Timely, specific feedback helps employees improve and stay motivated."},
+    {q:"How to evaluate promotions?", opts:["Based on skill, impact & readiness","Only tenure","Only favoritism","Random"], ans:0, explain:"Use objective criteria: competency, results and leadership readiness."},
+    {q:"What is stakeholder mapping?", opts:["Identify influence & interest of stakeholders","Only list names","Ignore mapping","Only for sales"], ans:0, explain:"Mapping helps prioritize engagement and communication strategies."},
+    {q:"How to manage cross-functional teams?", opts:["Clear goals and roles are key","Let them self-manage without guidance","Ignore conflicts","Centralize decisions"], ans:0, explain:"Define shared goals, roles, and coordinate communication across functions."},
+    {q:"What is continuous improvement?", opts:["Ongoing small improvements","Occasional big changes","Ignore feedback","Only manager role"], ans:0, explain:"Kaizen-style improvements increase efficiency and quality over time."},
+    {q:"Why measure team morale?", opts:["Morale affects productivity & retention","Not relevant","Only HR job","Only for events"], ans:0, explain:"High morale supports engagement and reduces turnover."}
+  ],
+
+  "Company Policies": [
+    {q:"What is a leave policy?", opts:["Rules for holidays & leaves","Only salary rules","Only job roles","Not important"], ans:0, explain:"Defines types of leaves, notice periods and eligibility."},
+    {q:"What is code of conduct?", opts:["Behavioral standards at workplace","Only dress code","Only HR docs","Not used"], ans:0, explain:"Guides acceptable behavior, ethics and professional standards."},
+    {q:"What is anti-harassment policy?", opts:["Protects employees from harassment","Only formalities","Not needed","Only managers"], ans:0, explain:"Defines unacceptable behavior and reporting mechanisms to protect employees."},
+    {q:"What is data privacy policy?", opts:["How employee data is handled","Only IT rules","Not relevant","Only external data"], ans:0, explain:"Explains storage, access and protection of personal and company data."},
+    {q:"What is equal opportunity policy?", opts:["Non-discrimination in employment","Only gender policy","Only for some countries","Not used"], ans:0, explain:"Ensures hiring and treatment without discrimination on protected grounds."},
+    {q:"What is remote work policy?", opts:["Guidelines for working remotely","Only vacation","Only office rules","Not needed"], ans:0, explain:"Outlines expectations, tools and security for remote employees."},
+    {q:"What is attendance policy?", opts:["Rules for punctuality & absence","Only payroll","Only managers","Not needed"], ans:0, explain:"Covers reporting absences, late arrival and consequences."},
+    {q:"What is expense policy?", opts:["How employees claim reimbursements","Only salary rules","Only procurement","Not used"], ans:0, explain:"Defines allowed expenses, approval process and documentation."},
+    {q:"What is probation policy?", opts:["Trial period and confirmation rules","Only benefits","Only salary","Not used"], ans:0, explain:"Explains duration, evaluation and confirmation procedure after probation."},
+    {q:"What is termination policy?", opts:["Process for ending employment","Only firing","Only resignation","Not documented"], ans:0, explain:"Covers notice periods, severance and exit formalities."},
+    {q:"What is grievance policy?", opts:["How employees report issues","Only HR talk","Only management","Not needed"], ans:0, explain:"Provides channels to raise concerns and a fair investigation process."},
+    {q:"What is whistleblower policy?", opts:["Protects those reporting wrongdoing","Only a suggestion","Not needed","Only legal team"], ans:0, explain:"Safeguards employees who report unethical or illegal behaviour."},
+    {q:"What is confidentiality policy?", opts:["Protects sensitive company info","Only in NDAs","Not important","Only for managers"], ans:0, explain:"Employees must protect proprietary and personal information."},
+    {q:"What is code for social media policy?", opts:["Guidelines for employee social media use","No rules","Only marketing","Not needed"], ans:0, explain:"Outlines acceptable social media behaviour related to the company."},
+    {q:"What is health & safety policy?", opts:["Ensures safe workplace","Only medical leaves","Only HR duty","Not relevant"], ans:0, explain:"Covers safety measures, emergency procedures and responsibilities."},
+    {q:"What is conflict of interest policy?", opts:["Avoid personal interests affecting company duties","Only managers","Not used","Only contracts"], ans:0, explain:"Employees must disclose relationships or activities that conflict with duties."},
+    {q:"What is remote device policy?", opts:["Rules for personal device use and security","Only suggestions","Not needed","Only IT"], ans:0, explain:"Defines security measures for devices accessing company systems."},
+    {q:"What is travel policy?", opts:["Rules and allowances for business travel","Only booking rules","Not needed","Only for executives"], ans:0, explain:"Specifies approvals, class of travel and expense limits."},
+    {q:"What is performance improvement plan (PIP)?", opts:["Plan to help underperformers improve","Only termination","Only HR paperwork","Not used"], ans:0, explain:"A structured plan with goals and timeline to help improve performance."},
+    {q:"What is BYOD policy?", opts:["Bring Your Own Device rules","Only HR idea","Not allowed","Only interns"], ans:0, explain:"BYOD policies set security and usage rules for personal devices at work."}
+  ]
+};
+
+/* runtime state */
+let subjectNames = Object.keys(dataset);
+let selectedSubject = null;
+let testQuestions = []; // subset chosen
+let answers = []; // user answers array (index or null)
+let currentQ = 0;
+let timerId = null;
+let remainingSec = 0;
+let totalSeconds = 0;
+
+/* init UI */
+document.getElementById('year').textContent = new Date().getFullYear();
+const subjectListEl = document.getElementById('subjectList');
+const selSubjectEl = document.getElementById('selSubject');
+const startBtn = document.getElementById('startTestBtn');
+const sampleBtn = document.getElementById('sampleBtn');
+const numQEl = document.getElementById('numQ');
+const timeMinsEl = document.getElementById('timeMins');
+
+/* render subject cards */
+function initSubjects(){
+  subjectListEl.innerHTML = '';
+  subjectNames.forEach(name=>{
+    const card = document.createElement('div');
+    card.className = 'subject-card';
+    card.innerHTML = `<div>
+      <div style="font-weight:700">${name}</div>
+      <div class="sub-meta">20 Questions • HR • Practice</div>
+    </div>
+    <div><button class="start-btn" data-sub="${name}">Select</button></div>`;
+    subjectListEl.appendChild(card);
+  });
+
+  // bind select buttons
+  document.querySelectorAll('.subject-card .start-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      selectedSubject = b.dataset.sub;
+      selSubjectEl.textContent = selectedSubject;
+      document.getElementById('setupCard').scrollIntoView({behavior:'smooth'});
+    });
+  });
+}
+
+/* pick random subset of questions based on num */
+function prepareTest(){
+  if(!selectedSubject){
+    alert('Please select a subject first from left panel.');
+    return false;
+  }
+  const pool = dataset[selectedSubject].slice(); // copy
+  const n = parseInt(numQEl.value,10);
+  // shuffle and take first n
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  testQuestions = pool.slice(0,n);
+  answers = Array(n).fill(null);
+  currentQ = 0;
+  return true;
+}
+
+function startTimer(minutes){
+  clearInterval(timerId);
+  remainingSec = minutes*60;
+  totalSeconds = remainingSec;
+  updateTimerUI();
+  timerId = setInterval(()=>{
+    remainingSec--;
+    updateTimerUI();
+    if(remainingSec<=0){ clearInterval(timerId); finishTest(true); }
+  },1000);
+}
+function formatTime(s){
+  const m = Math.floor(s/60); const sec = s%60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function updateTimerUI(){
+  document.getElementById('timeCircle').textContent = formatTime(remainingSec);
+  const pct = Math.max(0, ((totalSeconds - remainingSec)/totalSeconds)*100);
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+/* render question */
+function renderQuestion(){
+  const qc = document.getElementById('questionCard');
+  qc.innerHTML = '';
+  if(!testQuestions.length) return;
+  const qObj = testQuestions[currentQ];
+  document.getElementById('testTitle').textContent = `${selectedSubject} — Mock Test`;
+  document.getElementById('qSub').textContent = `Question ${currentQ+1} of ${testQuestions.length}`;
+
+  const qtxt = document.createElement('div');
+  qtxt.className = 'question-text';
+  qtxt.textContent = `${currentQ+1}. ${qObj.q}`;
+  qc.appendChild(qtxt);
+
+  const opts = document.createElement('div');
+  opts.className = 'options';
+  qObj.opts.forEach((opt,i)=>{
+    const o = document.createElement('div');
+    o.className = 'opt';
+    if(answers[currentQ]===i) o.classList.add('selected');
+    o.textContent = opt;
+    o.addEventListener('click', ()=>{
+      answers[currentQ]=i;
+      // visually mark selection
+      Array.from(opts.children).forEach(c=>c.classList.remove('selected'));
+      o.classList.add('selected');
+      updateSidebarStats();
+    });
+    opts.appendChild(o);
+  });
+  qc.appendChild(opts);
+}
+
+/* navigation handlers */
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(currentQ < testQuestions.length-1){ currentQ++; renderQuestion(); updateSidebarStats(); }
+  else finishTest(false);
+});
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(currentQ>0){ currentQ--; renderQuestion(); updateSidebarStats(); }
+});
+document.getElementById('skipBtn').addEventListener('click', ()=>{
+  if(currentQ < testQuestions.length-1){ currentQ++; renderQuestion(); updateSidebarStats(); }
+  else finishTest(false);
+});
+
+/* finish test */
+document.getElementById('finishBtn').addEventListener('click', ()=> finishTest(false));
+function finishTest(auto=false){
+  clearInterval(timerId);
+  // compute score
+  const total = testQuestions.length;
+  let correct = 0;
+  const analysis = [];
+  for(let i=0;i<total;i++){
+    const given = answers[i];
+    const q = testQuestions[i];
+    const isRight = (given!==null && given===q.ans);
+    if(isRight) correct++;
+    analysis.push({num:i+1, q:q.q, given: given===null?null:q.opts[given], correct:q.opts[q.ans], correctIndex:q.ans, explain:q.explain, isRight});
+  }
+  // show result UI
+  document.getElementById('quizCard').style.display='none';
+  const res = document.getElementById('resultCard');
+  res.style.display='block';
+  document.getElementById('scoreText').textContent = `${correct} / ${total}`;
+  document.getElementById('percentText').textContent = `${Math.round((correct/total)*100)}%`;
+  document.getElementById('resultMeta').textContent = `${selectedSubject} • ${total} Q • ${auto? 'Auto-submitted (time up)': 'Completed'}`;
+
+  // fill analysis
+  const area = document.getElementById('analysisArea');
+  area.innerHTML = '';
+  analysis.forEach(a=>{
+    const div = document.createElement('div');
+    div.style.padding='10px'; div.style.borderBottom='1px solid #eef4ff';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Q${a.num}.</strong> ${a.q}</div>
+        <div style="font-weight:700;color:${a.isRight? 'var(--accent-2)':'#e74c3c'}">${a.isRight? 'Correct':'Wrong'}</div>
+      </div>
+      <div style="margin-top:6px;color:var(--muted)"><strong>Correct:</strong> ${a.correct} <span style="margin-left:10px"><strong>Your:</strong> ${a.given? a.given : '<em>Not Answered</em>'}</span></div>
+      <div style="margin-top:8px;color:var(--muted)"><strong>Explain:</strong> ${a.explain}</div>`;
+    area.appendChild(div);
+  });
+
+  // show download button active
+  document.getElementById('downloadReport').onclick = ()=> downloadReport(correct,total,analysis);
+}
+
+/* download report */
+function downloadReport(score,total,analysis){
+  const name = selectedSubject.replace(/\s+/g,'_');
+  const filename = `${name}_mock_report.pdf`;
+  // build a printable DOM
+  const wrap = document.createElement('div');
+  wrap.style.fontFamily='Inter, Arial, sans-serif';
+  wrap.style.padding='20px';
+  wrap.innerHTML = `<h2>Mock Test Report — ${selectedSubject}</h2>
+    <p>Score: ${score} / ${total} (${Math.round((score/total)*100)}%)</p>
+    <hr>`;
+  analysis.forEach(a=>{
+    wrap.innerHTML += `<div style="margin-bottom:10px">
+      <strong>Q${a.num}.</strong> ${a.q}<br>
+      <strong>Correct:</strong> ${a.correct} &nbsp; <strong>Your:</strong> ${a.given? a.given : 'Not Answered'}<br>
+      <strong>Explain:</strong> ${a.explain}
+      </div>`;
+  });
+  const opt = {
+    margin: 12,
+    filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(wrap).save();
+}
+
+/* start test handler */
+startBtn.addEventListener('click', ()=>{
+  if(!prepareTest()) return;
+  // UI switch
+  document.getElementById('setupCard').scrollIntoView({behavior:'smooth'});
+  document.getElementById('quizCard').style.display='block';
+  document.getElementById('resultCard').style.display='none';
+  // start timer
+  const mins = parseInt(timeMinsEl.value,10);
+  startTimer(mins);
+  renderQuestion();
+  updateSidebarStats();
+});
+
+/* retake */
+document.getElementById('retakeBtn').addEventListener('click', ()=>{
+  // clear and show setup
+  document.getElementById('quizCard').style.display='none';
+  document.getElementById('resultCard').style.display='none';
+  selectedSubject = null;
+  selSubjectEl.textContent = 'None';
+  document.getElementById('setupCard').scrollIntoView({behavior:'smooth'});
+});
+
+/* sample quick fill */
+sampleBtn.addEventListener('click', ()=>{
+  selectedSubject = subjectNames[0];
+  selSubjectEl.textContent = selectedSubject;
+  numQEl.value = "10";
+  timeMinsEl.value = "5";
+});
+
+/* sidebar stats */
+function updateSidebarStats(){
+  // could show answered/remaining somewhere — for now update title
+  const answered = answers.filter(a=>a!==null).length;
+  const remain = testQuestions.length - answered;
+  document.getElementById('qSub').textContent = `Question ${currentQ+1} of ${testQuestions.length} • Answered ${answered} • Remaining ${remain}`;
+}
+
+/* keyboard nav */
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('quizCard').style.display==='block'){
+    if(e.key==='ArrowRight') document.getElementById('nextBtn').click();
+    if(e.key==='ArrowLeft') document.getElementById('prevBtn').click();
+    if(e.key==='s' || e.key==='S') document.getElementById('skipBtn').click();
+  }
+});
+
+/* initial render */
+initSubjects();
+</script>
+</body>
+</html>
